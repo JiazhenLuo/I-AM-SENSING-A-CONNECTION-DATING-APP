@@ -17,6 +17,59 @@ const validPage = new URLSearchParams(window.location.search).get('page')
 const startPage = nav.some(n => n.id === validPage) ? validPage : 'discover'
 const SWIPE_LIMIT = 68
 
+
+// Temporary on-device viewport diagnostics. Remove after the iPhone test.
+function ViewportDebug() {
+  const [metrics, setMetrics] = useState(null)
+
+  useEffect(() => {
+    let frame = null
+    const measure = () => {
+      if (frame !== null) cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const root = document.getElementById('root')
+        const shell = document.querySelector('.app-shell')
+        setMetrics({
+          innerHeight: window.innerHeight,
+          screenHeight: window.screen.height,
+          visualViewport: window.visualViewport?.height ?? 'N/A',
+          rootHeight: root?.getBoundingClientRect().height ?? 'N/A',
+          appHeight: shell?.getBoundingClientRect().height ?? 'N/A',
+          standalone: window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches,
+        })
+      })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    window.visualViewport?.addEventListener('resize', measure)
+    const delayed = window.setTimeout(measure, 1000)
+    return () => {
+      window.removeEventListener('resize', measure)
+      window.visualViewport?.removeEventListener('resize', measure)
+      window.clearTimeout(delayed)
+      if (frame !== null) cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  if (!metrics) return null
+  return (
+    <aside aria-label="Temporary viewport diagnostics" style={{
+      position: 'fixed', top: '115px', left: '10px', zIndex: 99999,
+      padding: '10px 12px', background: 'rgba(0,0,0,0.88)',
+      color: '#6eff85', fontFamily: 'monospace', fontSize: '12px',
+      lineHeight: 1.55, borderRadius: '8px', pointerEvents: 'none',
+      textShadow: 'none',
+    }}>
+      <div>innerHeight: {metrics.innerHeight}</div>
+      <div>screenHeight: {metrics.screenHeight}</div>
+      <div>visualViewport: {metrics.visualViewport}</div>
+      <div>rootHeight: {metrics.rootHeight}</div>
+      <div>appHeight: {metrics.appHeight}</div>
+      <div>standalone: {String(metrics.standalone)}</div>
+    </aside>
+  )
+}
+
 export default function App() {
   const [page, setPage] = useState(startPage)
   const [profileIndex, setProfileIndex] = useState(0)
@@ -143,16 +196,17 @@ export default function App() {
   const backgroundPhoto = photo
 
   return <main className={`app-shell page-${page}`}>
+    <ViewportDebug />
     <div className="ambient-photo" style={{ backgroundImage: `url("${backgroundPhoto}")` }} />
     <div className="ambient-overlay" />
 
     <header className="topbar">
       <button className="profile-avatar glass" aria-label="Playback settings (long press)" onPointerDown={onAvatarDown} onPointerUp={onAvatarUp} onPointerLeave={onAvatarUp} onContextMenu={e => { e.preventDefault(); setControlsOpen(true) }}>
         <img
-  src={`${import.meta.env.BASE_URL}photos/profile.png`}
-  alt="Dora"
-  className="dora-avatar"
-/>
+          src={`${import.meta.env.BASE_URL}photos/profile.png`}
+          alt="Dora"
+          className="dora-avatar"
+        />
       </button>
       <div className="header-actions">
         <button className="header-icon glass" onClick={() => setPage('messages')} aria-label="Messages"><MessageCircle size={18} /><i className="unread-dot" /></button>
