@@ -216,7 +216,7 @@ export default function CityMap({ profile, onOpenProfile }) {
     {failed && <div className="map-fallback">3D map unavailable on this device.</div>}
     {ready && pins.you?.visible && <div className="map-marker map-marker-you" style={{ left: pins.you.left, top: pins.you.top }}><span className="marker-you-dot"/><small>YOU</small></div>}
     {ready && pins.nellie?.visible && <button type="button" className="map-marker map-marker-nellie" style={{ left: pins.nellie.left, top: pins.nellie.top }} onClick={onOpenProfile} aria-label="Open Nellie's profile"><img src={profile.photos[0]} alt="Nellie"/><span>Nellie</span></button>}
-    <div className="map-location-label"><MapPin size={12}/> NEAR YOU <span>·</span> BURBANK</div>
+    <div className="map-location-label"><MapPin size={12}/> NEAR YOU </div>
     <button className="map-camera-reset glass" onClick={() => resetCamera.current()} aria-label="Reset 3D view"><RotateCcw size={17}/></button>
   </div>
 }
