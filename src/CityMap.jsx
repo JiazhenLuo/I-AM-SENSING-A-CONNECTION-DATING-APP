@@ -39,7 +39,7 @@ export default function CityMap({ profile, onOpenProfile }) {
     scene.fog = new THREE.FogExp2('#0c1012', .0065)
     const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 260)
     // Near top-down framing keeps the gold route visible on a portrait iPhone.
-    const startPos = new THREE.Vector3(0, 70, 18)
+    const startPos = new THREE.Vector3(0, 82, 21)
     camera.position.copy(startPos)
     const target = new THREE.Vector3(0, 0, 0)
     camera.lookAt(target)

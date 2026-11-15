@@ -148,7 +148,11 @@ export default function App() {
 
     <header className="topbar">
       <button className="profile-avatar glass" aria-label="Playback settings (long press)" onPointerDown={onAvatarDown} onPointerUp={onAvatarUp} onPointerLeave={onAvatarUp} onContextMenu={e => { e.preventDefault(); setControlsOpen(true) }}>
-        <span className="avatar-face">D</span>
+        <img
+  src={`${import.meta.env.BASE_URL}photos/profile.png`}
+  alt="Dora"
+  className="dora-avatar"
+/>
       </button>
       <div className="header-actions">
         <button className="header-icon glass" onClick={() => setPage('messages')} aria-label="Messages"><MessageCircle size={18} /><i className="unread-dot" /></button>
