@@ -173,76 +173,62 @@ button,input { font-family: inherit; }
 
 /* V8: the WebGL city reaches all viewport edges; overlays remain light and readable. */
 .city-map,.city-viewport,.city-canvas{width:100%;height:100%}
-/* =========================================
-   iPhone PWA Fullscreen Fix
-   ========================================= */
 
-html {
+
+/* ============================================================
+   iPhone standalone PWA viewport / bottom-edge fix
+   Keep these overrides LAST in this stylesheet.
+   ============================================================ */
+html, body {
   width: 100%;
   height: 100%;
-  height: -webkit-fill-available;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: #5c5148;
-}
-
-body {
-  width: 100%;
-  height: 100%;
-  min-height: -webkit-fill-available;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+  overscroll-behavior: none;
   background: #5c5148;
 }
 
 #root {
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
-  min-height: 100dvh;
-  margin: 0;
-  padding: 0;
   overflow: hidden;
   background: #5c5148;
 }
 
 .app-shell {
+  position: relative;
   width: 100%;
   height: 100%;
-  height: 100dvh;
   min-height: 0;
   max-height: none;
-  margin: 0 auto;
-  padding: 0;
   overflow: hidden;
+  margin: 0 auto;
 }
 
-/* Ensure the photographic background fills
-   the entire application container */
+/* Photo tint should continue all the way behind iPhone's home indicator. */
+.ambient-photo { inset: -150px; }
+.ambient-overlay { inset: 0; }
 
-.ambient-photo {
-  position: absolute;
-  inset: -125px;
+/* Move bottom navigation closer to the bottom safe-area boundary. */
+.bottom-nav {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
 }
 
-.ambient-overlay {
-  position: absolute;
-  inset: 0;
+/* Keep consistent visual spacing between card and navigation. */
+.discover-screen {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 94px);
 }
 
-/* Prevent unwanted scrolling */
-
-html,
-body,
-#root,
-.app-shell {
-  overscroll-behavior: none;
+/* Map preview follows the lowered bottom navigation. */
+.map-profile-preview {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
 }
-.dora-avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center;
+
+@media (max-height: 730px) {
+  .bottom-nav { bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); }
+  .discover-screen { bottom: calc(env(safe-area-inset-bottom, 0px) + 82px); }
+  .map-profile-preview { bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); }
 }
