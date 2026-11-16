@@ -222,6 +222,9 @@ export default function App() {
           className="dora-avatar"
         />
       </button>
+      <div className="app-title">
+  Connextion
+</div>
       <div className="header-actions">
         <button className="header-icon glass" onClick={() => setPage('messages')} aria-label="Messages"><MessageCircle size={18} /><i className="unread-dot" /></button>
         <button className="header-icon glass" onClick={() => setControlsOpen(true)} aria-label="More options"><MoreHorizontal size={20} /></button>

@@ -41,7 +41,7 @@ export default function CityMap({ profile, onOpenProfile }) {
     // Near top-down framing keeps the gold route visible on a portrait iPhone.
     const startPos = new THREE.Vector3(0, 82, 21)
     camera.position.copy(startPos)
-    const target = new THREE.Vector3(0, 0, 0)
+    const target = new THREE.Vector3(0, 0, 2)
     camera.lookAt(target)
 
     const hemi = new THREE.HemisphereLight('#d5e4f5', '#10151b', 2.5)

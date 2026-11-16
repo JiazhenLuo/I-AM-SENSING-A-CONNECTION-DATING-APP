@@ -362,3 +362,30 @@ body {
 
   text-shadow: 0 2px 8px #000;
 }
+/* =====================================
+   CONNEXION — App Title
+===================================== */
+
+.app-title {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  font-family: 'Zen Serif Regular', Georgia, serif;
+
+  font-size: 24px;
+  font-weight: 400;
+
+  letter-spacing: -0.6px;
+
+  color: #ffffff;
+
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+
+  white-space: nowrap;
+
+  pointer-events: none;
+}
