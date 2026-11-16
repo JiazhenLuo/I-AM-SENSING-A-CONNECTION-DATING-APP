@@ -1,6 +1,6 @@
 {
-  "name": "Discover — Playback",
-  "short_name": "Discover",
+  "name": "Connextion — Playback",
+  "short_name": "Connextion",
   "start_url": "./?page=discover",
   "scope": "./",
   "display": "standalone",

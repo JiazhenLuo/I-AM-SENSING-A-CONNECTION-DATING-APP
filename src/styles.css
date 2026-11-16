@@ -377,9 +377,11 @@ body {
   font-family: 'Zen Serif Regular', Georgia, serif;
 
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 700;
+    -webkit-text-stroke: 0.7px currentColor;
 
-  letter-spacing: -0.6px;
+
+  letter-spacing: 0px;
 
   color: #ffffff;
 
