@@ -1,15 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
+
 import {
-  ArrowLeft, ArrowUpRight, Compass, Heart, House, MapPin, MessageCircle,
-  MoreHorizontal, RotateCcw, Send, SlidersHorizontal, X
+  ArrowLeft,
+  ArrowUpRight,
+  Compass,
+  Map,
+  Heart,
+  House,
+  MapPin,
+  MessageCircle,
+  MoreHorizontal,
+  RotateCcw,
+  Send,
+  SlidersHorizontal,
+  X
 } from 'lucide-react'
+
 import { profiles } from './data'
 import CityMap from './CityMap'
 import './styles.css'
 
+
 const nav = [
   { id: 'discover', Icon: House, label: 'Discover' },
-  { id: 'explore', Icon: Compass, label: 'Explore' },
+  { id: 'explore', Icon: Map, label: 'Explore' },
   { id: 'likes', Icon: Heart, label: 'Likes' },
   { id: 'messages', Icon: MessageCircle, label: 'Messages' },
 ]
