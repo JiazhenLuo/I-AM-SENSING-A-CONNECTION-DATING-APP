@@ -164,10 +164,15 @@ export default function CityMap({ profile, onOpenProfile }) {
       camera.updateProjectionMatrix()
       renderer.setSize(w, h, false)
     }
-    function projectPoint(point) {
-      const projected = point.clone().add(new THREE.Vector3(0, 1, 0)).project(camera)
-      return { left: `${(projected.x + 1) * 50}%`, top: `${(1 - projected.y) * 50}%`, visible: projected.z < 1 }
-    }
+function projectPoint(point) {
+  const projected = point.clone().project(camera)
+
+  return {
+    left: `${(projected.x + 1) * 50}%`,
+    top: `${(1 - projected.y) * 50}%`,
+    visible: projected.z >= -1 && projected.z <= 1
+  }
+}
     // Project the route into a thin icon-like gold overlay. It stays visible
     // even when 3D buildings would otherwise obscure a ground-level line.
     function screenPath() {

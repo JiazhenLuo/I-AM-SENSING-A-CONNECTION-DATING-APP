@@ -297,3 +297,68 @@ body {
   max-height: none;
   overflow: hidden;
 }
+/* ========================================
+   YOU Marker — Precise Alignment
+======================================== */
+
+.map-marker.map-marker-you {
+  position: absolute;
+
+  width: 0;
+  height: 0;
+
+  transform: none;
+
+  display: block;
+
+  z-index: 5;
+
+  pointer-events: none;
+}
+
+/* Gold marker centered on route endpoint */
+
+.map-marker-you .marker-you-dot {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 14px;
+  height: 14px;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: #ffe2a1;
+
+  border: 3px solid #b98c4d;
+
+  box-shadow:
+    0 0 0 7px rgba(234, 189, 103, 0.2),
+    0 0 16px rgba(238, 200, 120, 0.7);
+}
+
+/* YOU label below the gold marker */
+
+.map-marker-you small {
+  position: absolute;
+
+  left: 0;
+  top: 16px;
+
+  transform: translateX(-50%);
+
+  margin: 0;
+
+  white-space: nowrap;
+
+  font-size: 13px;
+
+  letter-spacing: 1.5px;
+
+  color: #edcb83;
+
+  text-shadow: 0 2px 8px #000;
+}
