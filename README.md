@@ -17,7 +17,7 @@ Explore now generates city blocks well outside the visible map bounds, eliminati
 
 ## Assets
 
-- Nellie images: `public/photos/1.jpg` through `5.jpg`
+- Nellie images: `public/photos/1.jpeg` through `5.jpeg`
 - To use your licensed custom font, copy `ZEN-SERIF-REGULAR.OTF` into `public/fonts/` (not included in ZIP).
 
 ## GitHub Pages

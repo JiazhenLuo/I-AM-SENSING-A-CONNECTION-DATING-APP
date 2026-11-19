@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ArrowUpRight,
+  Bell,
   Compass,
   Map,
   Heart,
@@ -30,6 +31,7 @@ const nav = [
 const validPage = new URLSearchParams(window.location.search).get('page')
 const startPage = nav.some(n => n.id === validPage) ? validPage : 'discover'
 const SWIPE_LIMIT = 68
+const doraAvatar = `${import.meta.env.BASE_URL}photos/dora-avatar.png`
 
 
 // Temporary on-device viewport diagnostics. Remove after the iPhone test.
@@ -95,6 +97,8 @@ export default function App() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [controlsOpen, setControlsOpen] = useState(false)
   const [liked, setLiked] = useState([])
+  const [matchPending, setMatchPending] = useState(false)
+  const [match, setMatch] = useState(null)
   const [passed, setPassed] = useState([])
   const [mapSelected, setMapSelected] = useState('nellie')
   const [chatText, setChatText] = useState('')
@@ -104,6 +108,8 @@ export default function App() {
   const blockClick = useRef(false)
   const swipeTimer = useRef(null)
   const holdTimer = useRef(null)
+  const matchTimer = useRef(null)
+  const matchDialog = useRef(null)
   const profile = profiles[profileIndex]
   const mapProfile = profiles.find(p => p.id === mapSelected) || profiles[0]
   const photo = profile.photos[photoIndex] || profile.photos[0]
@@ -112,6 +118,11 @@ export default function App() {
 
   function reset() {
     clearTimeout(swipeTimer.current)
+    clearTimeout(matchTimer.current)
+    matchTimer.current = null
+    matchDialog.current?.close()
+    setMatchPending(false)
+    setMatch(null)
     setPage('discover'); setProfileIndex(0); setPhotoIndex(0)
     setDragX(0); setIsDragging(false); setSwipeOut(null); setDetailsOpen(false); setControlsOpen(false)
     setLiked([]); setPassed([]); setMapSelected('nellie'); setMessages([]); setChatText('')
@@ -123,19 +134,33 @@ export default function App() {
     setPhotoFlash(n => n + 1)
   }
 
+  function startMatch() {
+    if (matchTimer.current !== null || match) return
+    setLiked(old => old.includes(profile.id) ? old : [...old, profile.id])
+    setMatchPending(true)
+    matchTimer.current = setTimeout(() => {
+      matchTimer.current = null
+      setMatchPending(false)
+      setMatch(profile)
+    }, 2000)
+  }
+
+  function closeMatch() {
+    matchDialog.current?.close()
+    setMatch(null)
+  }
+
+  function handleMatchBackdropClick(event) {
+    if (event.target !== event.currentTarget) return
+    const { left, right, top, bottom } = event.currentTarget.getBoundingClientRect()
+    if (event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom) {
+      closeMatch()
+    }
+  }
+
   // Single-actor playback: horizontal gestures browse the 5 photos, never another person.
-  function changeProfile(direction, decision = null) {
+  function changeProfile(direction) {
     if (swipeOut) return
-    if (decision === 'like') {
-      setLiked(old => old.includes(profile.id) ? old.filter(id => id !== profile.id) : [...old, profile.id])
-      setIsDragging(false); setDragX(0)
-      return
-    }
-    if (decision === 'pass') {
-      setPhotoIndex(0); setPhotoFlash(n => n + 1)
-      setIsDragging(false); setDragX(0)
-      return
-    }
     setIsDragging(false)
     setDragX(0)
     movePhoto(direction === 'left' ? 1 : -1)
@@ -193,7 +218,7 @@ export default function App() {
   useEffect(() => {
     const listener = event => {
       if (event.shiftKey && event.key.toLowerCase() === 'r') { event.preventDefault(); reset(); return }
-      if (page !== 'discover' || detailsOpen || controlsOpen) return
+      if (page !== 'discover' || detailsOpen || controlsOpen || match) return
       if (event.key === 'ArrowLeft') changeProfile('left')
       if (event.key === 'ArrowRight') changeProfile('right')
       if (event.key === 'ArrowUp') movePhoto(-1)
@@ -201,8 +226,15 @@ export default function App() {
     }
     window.addEventListener('keydown', listener)
     return () => window.removeEventListener('keydown', listener)
-  }, [page, profileIndex, photoIndex, swipeOut, detailsOpen, controlsOpen])
-  useEffect(() => () => { clearTimeout(swipeTimer.current); clearTimeout(holdTimer.current) }, [])
+  }, [page, profileIndex, photoIndex, swipeOut, detailsOpen, controlsOpen, match])
+  useEffect(() => () => {
+    clearTimeout(swipeTimer.current)
+    clearTimeout(holdTimer.current)
+    clearTimeout(matchTimer.current)
+  }, [])
+  useEffect(() => {
+    if (match) matchDialog.current.showModal()
+  }, [match])
 
   const onAvatarDown = () => { holdTimer.current = setTimeout(() => setControlsOpen(true), 700) }
   const onAvatarUp = () => clearTimeout(holdTimer.current)
@@ -217,7 +249,7 @@ export default function App() {
     <header className="topbar">
       <button className="profile-avatar glass" aria-label="Playback settings (long press)" onPointerDown={onAvatarDown} onPointerUp={onAvatarUp} onPointerLeave={onAvatarUp} onContextMenu={e => { e.preventDefault(); setControlsOpen(true) }}>
         <img
-          src={`${import.meta.env.BASE_URL}photos/profile.png`}
+          src={doraAvatar}
           alt="Dora"
           className="dora-avatar"
         />
@@ -226,7 +258,7 @@ export default function App() {
   Connextion
 </div>
       <div className="header-actions">
-        <button className="header-icon glass" onClick={() => setPage('messages')} aria-label="Messages"><MessageCircle size={18} /><i className="unread-dot" /></button>
+        <button className="header-icon glass" onClick={() => setPage('messages')} aria-label="Message notifications"><Bell size={18} /><i className="unread-dot" /></button>
         <button className="header-icon glass" onClick={() => setControlsOpen(true)} aria-label="More options"><MoreHorizontal size={20} /></button>
       </div>
     </header>
@@ -253,15 +285,14 @@ export default function App() {
         </div>
       </div>
       <div className="card-actions">
-        <button className="action-pass glass" aria-label="Restart Nellie's photos" onClick={() => changeProfile('left', 'pass')}><RotateCcw size={22} strokeWidth={1.8}/></button>
-        <button className={`action-like glass ${liked.includes(profile.id) ? 'is-liked' : ''}`} aria-label="Like Nellie" onClick={() => changeProfile('left', 'like')}><Heart size={24} fill={liked.includes(profile.id) ? 'currentColor' : 'none'} strokeWidth={1.5}/></button>
+        <button className={`action-like glass ${liked.includes(profile.id) ? 'is-liked' : ''}`} aria-label={`Like ${profile.name}`} aria-disabled={matchPending} onClick={startMatch}><Heart size={35} fill={liked.includes(profile.id) ? 'currentColor' : 'none'} strokeWidth={1.7}/></button>
       </div>
     </section>}
 
     {page === 'explore' && <section className="explore-screen" aria-label="Explore nearby">
-      <CityMap profile={profile} onOpenProfile={() => openProfile(profile.id)} />
+      <CityMap avatar={doraAvatar} onOpenProfile={() => openProfile(profile.id)} />
       <button className="map-profile-preview glass" onClick={() => openProfile(profile.id)}>
-        <img src={profile.photos[0]} alt="Nellie" />
+        <img src={doraAvatar} alt={profile.name} />
         <span className="map-preview-copy"><strong>{profile.name}, {profile.age}</strong><small>{profile.distance} <b>·</b> {profile.job}</small></span>
         <ArrowUpRight size={20}/>
       </button>
@@ -279,7 +310,26 @@ export default function App() {
 
     <nav className="bottom-nav glass" aria-label="Main navigation">{nav.map(({id, Icon, label}) => <button key={id} className={page === id ? 'active' : ''} onClick={() => {setPage(id); setDetailsOpen(false)}} aria-label={label}><Icon size={22} strokeWidth={page === id ? 2.6 : 1.8} fill={id === 'likes' && page === id ? 'currentColor' : 'none'}/></button>)}</nav>
 
-    {detailsOpen && <div className="modal-backdrop" onClick={() => setDetailsOpen(false)}><section className="detail-sheet" onClick={e => e.stopPropagation()}><button className="sheet-close" onClick={() => setDetailsOpen(false)} aria-label="Close"><X size={21}/></button><p className="sheet-kicker">ABOUT ME</p><h2>{profile.name}, {profile.age}</h2><p className="sheet-location"><MapPin size={16}/> {profile.location} · {profile.distance}</p><p className="sheet-bio">“{profile.bio}”</p><div className="interest-list">{profile.interests.map(t => <span key={t}>{t}</span>)}</div><button className="sheet-action" onClick={() => {setDetailsOpen(false); changeProfile('left', 'like')}}><Heart size={18}/> Like {profile.name}</button></section></div>}
+    {detailsOpen && <div className="modal-backdrop" onClick={() => setDetailsOpen(false)}><section className="detail-sheet" onClick={e => e.stopPropagation()}><button className="sheet-close" onClick={() => setDetailsOpen(false)} aria-label="Close"><X size={21}/></button><p className="sheet-kicker">ABOUT ME</p><h2>{profile.name}, {profile.age}</h2><p className="sheet-location"><MapPin size={16}/> {profile.location} · {profile.distance}</p><p className="sheet-bio">“{profile.bio}”</p><div className="interest-list">{profile.interests.map(t => <span key={t}>{t}</span>)}</div><button className="sheet-action" onClick={() => {setDetailsOpen(false); startMatch()}}><Heart size={18}/> Like {profile.name}</button></section></div>}
+
+    {match && <dialog className="match-dialog" ref={matchDialog} aria-labelledby="match-title" aria-describedby="match-description" onClick={handleMatchBackdropClick} onCancel={event => { event.preventDefault(); closeMatch() }}>
+      <button type="button" className="match-close" aria-label="Close match" onClick={closeMatch}><X size={21} /></button>
+      <div className="match-illustration" aria-hidden="true">
+        <span className="match-avatar match-avatar-dora"><img src={doraAvatar} alt="" /></span>
+        <span className="match-connection">
+          <svg viewBox="0 0 140 40" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+            <path className="match-line" pathLength="1" d="M2 22 C31 1 43 39 70 25" />
+            <path className="match-line" pathLength="1" d="M138 22 C105 -8 98 2 70 25" />
+          </svg>
+          <Heart className="match-heart" fill="currentColor" />
+        </span>
+        <span className="match-avatar match-avatar-nellie"><img src={match.avatar || match.photos[0]} alt="" /></span>
+      </div>
+      <h2 id="match-title">It's a Connection.</h2>
+      <p id="match-description">You and {match.name} felt the same spark.</p>
+      <button className="match-hello" onClick={() => { closeMatch(); setDetailsOpen(false); setControlsOpen(false); setPage('messages') }}>Say Hello</button>
+      <button className="match-explore" onClick={closeMatch}>Keep Exploring</button>
+    </dialog>}
 
     {controlsOpen && <div className="modal-backdrop" onClick={() => setControlsOpen(false)}><section className="detail-sheet control-sheet" onClick={e => e.stopPropagation()}><button className="sheet-close" onClick={() => setControlsOpen(false)} aria-label="Close"><X size={21}/></button><p className="sheet-kicker">CREW ONLY</p><h2>Playback controls</h2><p>Reset before each take. Shift + R also resets the app.</p><button className="sheet-action" onClick={reset}><RotateCcw size={18}/> Reset to Nellie / Photo 1</button><button className="secondary-action" onClick={() => {setControlsOpen(false); setPage('explore'); setMapSelected('nellie')}}><Compass size={18}/> Open Explore map</button></section></div>}
   </main>
