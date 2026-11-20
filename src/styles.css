@@ -2037,7 +2037,9 @@ body {
   padding: 24px 18px 12px;
   border: 0;
   border-radius: 24px;
-  background: #60110D;
+  background: rgb(96 17 13 / 88%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
   color: #f8eee1;
   box-shadow: 0 16px 60px #0008;
   text-align: center;
