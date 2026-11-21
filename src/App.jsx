@@ -290,10 +290,10 @@ export default function App() {
     </section>}
 
     {page === 'explore' && <section className="explore-screen" aria-label="Explore nearby">
-      <CityMap avatar={doraAvatar} onOpenProfile={() => openProfile(profile.id)} />
-      <button className="map-profile-preview glass" onClick={() => openProfile(profile.id)}>
-        <img src={doraAvatar} alt={profile.name} />
-        <span className="map-preview-copy"><strong>{profile.name}, {profile.age}</strong><small>{profile.distance} <b>·</b> {profile.job}</small></span>
+      <CityMap avatar={mapProfile.avatar} onOpenProfile={() => openProfile(mapProfile.id)} />
+      <button className="map-profile-preview glass" onClick={() => openProfile(mapProfile.id)}>
+        <img src={mapProfile.avatar} alt={mapProfile.name} />
+        <span className="map-preview-copy"><strong>{mapProfile.name}, {mapProfile.age}</strong><small>{mapProfile.distance} <b>·</b> {mapProfile.job}</small></span>
         <ArrowUpRight size={20}/>
       </button>
     </section>}
